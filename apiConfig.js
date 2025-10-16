@@ -1,5 +1,5 @@
 
-const environment = "dev";
+const environment = "prod";
 
 const baseUrls = {
     dev: "https://jallikattu.tn.gov.in/jallikattu_api/v1",
@@ -7,6 +7,7 @@ const baseUrls = {
 };
 
 const BASE_API_URL = baseUrls[environment];
+const FILE_BASE_URL = BASE_API_URL.replace(/\/v1$/, "") + "/uploads";
 
 const apiPaths = {
     login: "/access/login",

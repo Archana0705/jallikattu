@@ -959,8 +959,7 @@
       });
 
       $(document).on("click", "#forwardtoDc", async function () {
-        ;
-
+        const eventId = $("#editEventId").text();
         const committeeId = $(this).data("committee-id");
         const committeeRow = $(this).closest("tr");
 

@@ -717,64 +717,6 @@
                                     </div>
                                   </div>
 
-                                  <!-- <div id="editSection">
-
-                                    <div>
-                                      <label for="editMonitoringId">Monitoring ID</label>
-                                      <input type="text" id="editMonitoringId" name="monitoring_id" />
-                                    </div>
-                                    <div>
-                                      <label for="editEventId">Event ID</label>
-                                      <input type="text" id="editEventId" name="event_id" />
-                                    </div>
-                                    <div>
-                                      <label for="editParticipants">Participants</label>
-                                      <input type="text" id="editParticipants" name="participants" />
-                                    </div>
-                                    <div>
-                                      <label for="editNumberOfBulls">Number of Bulls</label>
-                                      <input type="text" id="editNumberOfBulls" name="number_of_bulls" />
-                                    </div>
-                                    <div>
-                                      <label for="editPreEventArrangements">Pre-event Arrangements</label>
-                                      <input type="text" id="editPreEventArrangements" name="preevent_arrangements" />
-                                    </div>
-                                    <div>
-                                      <label for="editArenaSize">Arena Size</label>
-                                      <input type="text" id="editArenaSize" name="arena_size" />
-                                    </div>
-                                    <div>
-                                      <label for="editBullRunArea">Bull Run Area</label>
-                                      <input type="text" id="editBullRunArea" name="bull_run_area" />
-                                    </div>
-                                    <div>
-                                      <label for="editBullExaminationAreaSize">Bull Examination Area Size</label>
-                                      <input type="text" id="editBullExaminationAreaSize"
-                                        name="bull_examination_area_size" />
-                                    </div>
-                                    <div>
-                                      <label for="editBullExaminationLength">Bull Examination Length</label>
-                                      <input type="text" id="editBullExaminationLength"
-                                        name="bull_examination_length" />
-                                    </div>
-                                    <div>
-                                      <label for="editBullExaminationBreath">Bull Examination Breath</label>
-                                      <input type="text" id="editBullExaminationBreath"
-                                        name="bull_examination_breath" />
-                                    </div>
-                                    <div>
-                                      <label for="editJoinAttachFilename">Join Attach Filename</label>
-                                      <input type="file" id="editJoinAttachFilename" name="join_attach_filename" />
-                                    </div>
-                                    <div>
-                                      <label for="editJointReportComments">Joint Report Comments</label>
-                                      <textarea id="editJointReportComments" name="joint_report_comments"></textarea>
-                                    </div>
-                                    <button type="submit" id="saveEditedEvent">Save Changes</button>
-                                  </div> -->
-
-
-
                                   <div role="dialog" aria-label="Column&#x20;Actions" aria-modal="true"
                                     class="a-IRR-sortWidget" id="DMCF_sort_widget" style="display:none;">
                                     <h1 class="u-vh" aria-roledescription="Visually&#x20;hidden&#x20;dialog&#x20;title">
@@ -1085,15 +1027,27 @@
         "X-APP-NAME": "tn jallikattu"
       },
       success: function (response) {
-        if (response.success) {
+        if (response.success == 1) {
           const tableData = response.data;
           populateDistrictMonitoringTable(tableData);
         } else {
-          console.error("Error fetching data: ", response.message);
+          // No data found or error case
+          console.warn("No data found: ", response.message);
+          $('#districtMonitoringTable tbody').html(
+            `<tr><td colspan="13" class="text-center">No Data Found</td></tr>`
+          );
         }
       },
       error: function (xhr, status, error) {
         console.error("AJAX error: ", error);
+        $('#districtMonitoringTable tbody').html(
+          `<tr><td colspan="13" class="text-center">Error fetching data</td></tr>`
+        );
+      },
+      complete: function () {
+        // Always hide loader
+        $('#preloader').hide();
+        $("body").removeClass("user_loading");
       }
     });
 

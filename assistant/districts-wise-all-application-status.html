@@ -152,7 +152,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <!-- Toast -->
   <div class="toast-container position-fixed p-3 custom_toast" x-data="transButtonComponent()">
-    <div id="errorToast" class="toast align-items-center text-bg-primary border-0 " role="alert" aria-live="assertive"
+    <div id="errorToast" class="toast align-items-center text-bg-primary border-0 " aria-live="assertive"
       aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
@@ -162,7 +162,7 @@
           aria-label="Close"></button>
       </div>
     </div>
-    <div id="successToast" class="toast align-items-center text-bg-primary border-0 " role="alert" aria-live="assertive"
+    <div id="successToast" class="toast align-items-center text-bg-primary border-0 " aria-live="assertive"
       aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
@@ -699,6 +699,9 @@
   </script>
   <script>
     AOS.init();
+    window.alert = function (message) {
+      console.warn("Alert blocked:", message);
+    };
     $(document).on({
       ajaxStart: function () {
         $('#preloader').show();
@@ -718,7 +721,7 @@
       const bytes = CryptoJS.AES.decrypt(encryptedDataFromStorage, secretKey);
       decryptedData = bytes.toString(CryptoJS.enc.Utf8);
     } else {
-      console.log('No data found in localStorage');
+      // console.log('No data found in localStorage');
     }
     let userDetails = decryptedData;
     let userId = '';
@@ -813,6 +816,31 @@
             const districtBodyRow = $("#districtBody");
             const tableData = response.data;
             const tableBody = $("#districtBody tbody");
+            const createDownloadLink = (content, mimeType, filename) => {
+              if (!content) return "N/A";
+
+              try {
+                const base64Pattern = /^[A-Za-z0-9+/=]+$/;
+                if (base64Pattern.test(content.replace(/\s/g, ""))) {
+                  const blob = new Blob(
+                    [new Uint8Array(atob(content).split("").map(c => c.charCodeAt(0)))],
+                    { type: mimeType }
+                  );
+                  const url = URL.createObjectURL(blob);
+                  return `<a href="${url}" target="_blank" class="btn btn-sm btn-link">Download</a>`;
+                }
+
+                // ✅ Avoid double "uploads/"
+                if (content.startsWith("http")) {
+                  return `<a href="${content}" target="_blank" class="btn btn-sm btn-link">Download</a>`;
+                }
+
+                return `<a href="${FILE_BASE_URL}/${content.replace(/^uploads\//, "")}" target="_blank" class="btn btn-sm btn-link">Download</a>`;
+              } catch (error) {
+                console.error("Error creating download link:", error);
+                return "Invalid content";
+              }
+            };
             tableBody.empty();
             if (!tableData || tableData.length === 0) {
               tableBody.append('<tr><td colspan="12" class="text-center">No Data Found</td></tr>');
@@ -837,20 +865,21 @@
                   <td>${district.name_of_president}</td>
                   <td>${district.contact_of_president}</td>
                   <td>${district.mobile_of_president}</td>
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.request_letter}" data-mimetype="${district.attach_mimetype} data-filename="${district.attach_filename}" target="_blank">Download</a></td>
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.assurance_bond}" data-mimetype="${district.assurance_bond_attach_mimetype} data-filename="${district.assurance_bond_attach_filename}" target="_blank">Download</a></td>
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.insurance_copy}" data-mimetype="${district.insurance_copy_attach_mimetype} data-filename="${district.insurance_copy_attach_filename}" target="_blank">Download</a></td>                  
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.layout_sketch}" data-mimetype="${district.layout_sketch_attach_mimetype} data-filename="${district.layout_sketch_attach_filename}" target="_blank">Download</a></td>                  
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.other_docs}" data-mimetype="${district.other_docs_attach_mimetype} data-filename="${district.other_docs_attach_filename}" target="_blank">Download</a></td>                 
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.previous_event}" data-mimetype="${district.previous_event_attach_mimetype} data-filename="${district.previous_event_attach_filename}" target="_blank">Download</a></td>               
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.panchayat_union}" data-mimetype="${district.panchayat_union_attach_mimetype} data-filename="${district.panchayat_union_attach_filename}" target="_blank">Download</a></td>
-                  <td>pareyr</td>              
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.upload_photo}" data-mimetype="${district.upload_photo_attach_mimetype} data-filename="${district.upload_photo_attach_filename}" target="_blank">Download</a></td>              
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.arena_upload}" data-mimetype="${district.arena_upload_mime_type} data-filename="${district.arena_upload_filename}" target="_blank">Download</a></td>             
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.length_arena_upload}" data-mimetype="${district.length_arena_upload_mime_type} data-filename="${district.length_arena_upload_filename}" target="_blank">Download</a></td>        
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.bull_arena_upload}" data-mimetype="${district.bull_arena_upload_mime_type} data-filename="${district.bull_arena_upload_filename}" target="_blank">Download</a></td>            
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.bull_examination_upload}" data-mimetype="${district.bull_examination_upload_mime_type} data-filename="${district.bull_examination_upload_filename}" target="_blank">Download</a></td>        
-                  <td class="u-tL"><a href="javascript:void(0);" class="download-btn" data-download="${district.join_monitoring_commitee_report}" data-mimetype="${district.join_attach_mimetype} data-filename="${district.join_attach_filename}" target="_blank">Download</a></td> 
+                  <td class="u-tL">${createDownloadLink(district.request_letter, district.attach_mimetype, district.attach_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.assurance_bond, district.assurance_bond_attach_mimetype, district.assurance_bond_attach_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.insurance_copy, district.insurance_copy_attach_mimetype, district.insurance_copy_attach_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.layout_sketch, district.layout_sketch_attach_mimetype, district.layout_sketch_attach_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.other_docs, district.other_docs_attach_mimetype, district.other_docs_attach_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.previous_event, district.previous_event_attach_mimetype, district.previous_event_attach_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.panchayat_union, district.panchayat_union_attach_mimetype, district.panchayat_union_attach_filename)}</td>
+                  <td>pareyr</td>
+                  <td class="u-tL">${createDownloadLink(district.upload_photo, district.upload_photo_attach_mimetype, district.upload_photo_attach_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.arena_upload, district.arena_upload_mime_type, district.arena_upload_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.length_arena_upload, district.length_arena_upload_mime_type, district.length_arena_upload_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.bull_arena_upload, district.bull_arena_upload_mime_type, district.bull_arena_upload_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.bull_examination_upload, district.bull_examination_upload_mime_type, district.bull_examination_upload_filename)}</td>
+                  <td class="u-tL">${createDownloadLink(district.join_monitoring_commitee_report, district.join_attach_mimetype, district.join_attach_filename)}</td>
+
                   <td>Magesterial-null</td>
                   <td>dis-coll-comm</td>
                   <td>${district.joint_report_comments}</td>
@@ -913,7 +942,7 @@
         });
 
         if (mobiles.length === 0) {
-          alert("No participants found for approval.");
+          showErrorToast("No participants found for approval.");
           return;
         }
 
@@ -929,10 +958,10 @@
           data: JSON.stringify({ mobile_no: mobiles }), // Convert data to JSON string
           success: function (response) {
             showSuccessToast("Approval successful!");
-            console.log("API Response: ", response);
+            // console.log("API Response: ", response);
           },
           error: function (xhr, status, error) {
-            console.error("Error approving participants: ", error);
+            // console.error("Error approving participants: ", error);
             showErrorToast("Failed to approve participants.");
           }
         });
@@ -943,7 +972,7 @@
 
       // If no data in table
       if (table.rows().count() === 0) {
-        alert("No data available to download.");
+        showErrorToast("No data available to download.");
         return;
       }
 

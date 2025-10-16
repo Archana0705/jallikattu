@@ -1395,7 +1395,9 @@
           console.error('Error fetching event places:', error);
         });
     });
+
     $(document).ready(function () {
+      // ✅ Prefill values from `details`
       $('#P5_EVENT_DATE').val(convertToMMDDYYYY(details.event_date));
       $('#P5_COMMITEE_REGISTER_NUMBER').val(details.commitee_register_number);
       $('#P5_NAME_OF_ORGANIZATION').val(details.name_of_organization);
@@ -1406,6 +1408,7 @@
       $('#P5_NAME_OF_VILLAGE').val(details.name_of_village);
       $('#P5_PINCODE').val(details.pincode);
 
+      // ✅ Show existing filenames
       $('#requestLetterName').text(details.attach_filename || 'No file chosen');
       $('#assuranceBondName').text(details.assurance_bond_attach_filename || 'No file chosen');
       $('#insuranceName').text(details.insurance_copy_attach_filename || 'No file chosen');
@@ -1416,16 +1419,15 @@
       $('#uploadPhotoName').text(details.upload_photo_attach_filename || 'No file chosen');
       $('#firName').text(details.fir_attach_filename || 'No file chosen');
 
+      // ✅ Form Submit
       $('#registrationForm').on('submit', async function (e) {
-        e.preventDefault();  // Prevent the default form submission behavior
-
-        // Clear previous error messages
+        debugger;
+        e.preventDefault();
         $('.error-message').remove();
 
-        // Initialize an array to hold validation errors
         var errors = false;
 
-        // Validate required fields
+        // Field validations
         validateField('#P5_EVENT_DATE', 'Please Fill Event Date.');
         validateField('#P5_EVENT_TYPE', 'Please Fill Event Type.');
         validateField('#P5_NAME_OF_ORGANIZATION', 'Please Fill Name Of Organization.');
@@ -1438,10 +1440,9 @@
         validateField('#P5_NAME_OF_VILLAGE', 'Please Fill Name Of Village.');
         validateField('#P5_PINCODE', 'Please Fill PINCODE.');
 
-        // If errors are found, stop form submission
         if (errors) {
           showErrorToast("Please fill in all fields.");
-          return;  // Prevent form submission
+          return;
         }
 
         checkFile('#P5_REQUEST_LETTER');
@@ -1453,54 +1454,86 @@
         checkFile('#P5_UPLOAD_PHOTO');
         checkFile('#P5_INSURANCE_COPY');
         checkFile('#P5_OTHER_DOCS');
-        // Check and process optional file fields
-        let requestLetter = null;  // Declare insurance variable at the beginning
 
-        if ($('#P5_REQUEST_LETTER')[0].files && $('#P5_REQUEST_LETTER')[0].files[0]) {
-          requestLetter = await processFile('#P5_REQUEST_LETTER_input');
-        }
-        let assuranceBond = null;  // Declare variable at the beginning
-
-        if ($('#P5_ASSURANCE_BOND')[0].files && $('#P5_ASSURANCE_BOND')[0].files[0]) {
-          assuranceBond = await processFile('#P5_ASSURANCE_BOND_input');
-        }
-        let layoutSketch = null;  // Declare variable at the beginning
-
-        if ($('#P5_LAYOUT_SKETCH')[0].files && $('#P5_LAYOUT_SKETCH')[0].files[0]) {
-          layoutSketch = await processFile('#P5_LAYOUT_SKETCH_input');
-        }
-        let previousEvent = null;  // Declare variable at the beginning
-
-        if ($('#P5_PREVIOUS_EVENT')[0].files && $('#P5_PREVIOUS_EVENT')[0].files[0]) {
-          previousEvent = await processFile('#P5_PREVIOUS_EVENT_input');
-        }
-        let panchayatUnion = null;  // Declare variable at the beginning
-
-        if ($('#P5_PANCHAYAT_UNION')[0].files && $('#P5_PANCHAYAT_UNION')[0].files[0]) {
-          panchayatUnion = await processFile('#P5_PANCHAYAT_UNION_input');
-        }
-        let fir = null;  // Declare variable at the beginning
-
-        if ($('#P5_FIR')[0].files && $('#P5_FIR')[0].files[0]) {
-          fir = await processFile('#P5_FIR_input');
-        }
-        let uploadPhoto = null;  // Declare variable at the beginning
-
-        if ($('#P5_UPLOAD_PHOTO')[0].files && $('#P5_UPLOAD_PHOTO')[0].files[0]) {
-          uploadPhoto = await processFile('#P5_UPLOAD_PHOTO_input');
-        }
-        let insurance = null;  // Declare insurance variable at the beginning
-
-        if ($('#P5_INSURANCE_COPY')[0].files && $('#P5_INSURANCE_COPY')[0].files[0]) {
-          insurance = await processFile('#P5_INSURANCE_COPY_input');
+        // ✅ Helper function to get file data (new or existing)
+        async function getFileData(inputSelector, existingBase64, existingMime, existingName) {
+          const input = $(inputSelector)[0];
+          if (input && input.files && input.files.length > 0) {
+            return await processFile(inputSelector);
+          } else {
+            return {
+              fileBase64: existingBase64 || null,
+              mimetype: existingMime || null,
+              filename: existingName || null
+            };
+          }
         }
 
-        let otherDocs = null;  // Declare otherDocs variable at the beginning
+        // ✅ Read all file inputs (keeps old if new not uploaded)
+        let requestLetter = await processFile(
+          '#P5_REQUEST_LETTER_input',
+          details.request_letter,
+          details.attach_mimetype,
+          details.attach_filename
+        );
 
-        if ($('#P5_OTHER_DOCS')[0].files && $('#P5_OTHER_DOCS')[0].files[0]) {
-          otherDocs = await processFile('#P5_OTHER_DOCS_input');
-        }
-        // Prepare the JSON payload
+        let assuranceBond = await processFile(
+          '#P5_ASSURANCE_BOND_input',
+          details.assurance_bond,
+          details.assurance_bond_attach_mimetype,
+          details.assurance_bond_attach_filename
+        );
+
+        let insurance = await processFile(
+          '#P5_INSURANCE_COPY_input',
+          details.insurance_copy,
+          details.insurance_copy_attach_mimetype,
+          details.insurance_copy_attach_filename
+        );
+
+        let layoutSketch = await processFile(
+          '#P5_LAYOUT_SKETCH_input',
+          details.layout_sketch,
+          details.layout_sketch_attach_mimetype,
+          details.layout_sketch_attach_filename
+        );
+
+        let previousEvent = await getFileData(
+          '#P5_PREVIOUS_EVENT_input',
+          details.previous_event,
+          details.previous_event_attach_mimetype,
+          details.previous_event_attach_filename
+        );
+
+        let panchayatUnion = await getFileData(
+          '#P5_PANCHAYAT_UNION_input',
+          details.panchayat_union,
+          details.panchayat_union_attach_mimetype,
+          details.panchayat_union_attach_filename
+        );
+
+        let fir = await getFileData(
+          '#P5_FIR_input',
+          details.fir,
+          details.fir_attach_mimetype,
+          details.fir_attach_filename
+        );
+
+        let uploadPhoto = await getFileData(
+          '#P5_UPLOAD_PHOTO_input',
+          details.upload_photo,
+          details.upload_photo_attach_mimetype,
+          details.upload_photo_attach_filename
+        );
+
+        let otherDocs = await getFileData(
+          '#P5_OTHER_DOCS_input',
+          details.other_docs,
+          details.other_docs_attach_mimetype,
+          details.other_docs_attach_filename
+        );
+
+        // ✅ Payload
         const payload = {
           P84_EVENT_ID: details.event_id,
           EVENT_DATE: formatDate($('#P5_EVENT_DATE').val()),
@@ -1515,37 +1548,52 @@
           PINCODE: $('#P5_PINCODE').val(),
           EVENT_TYPE: $('#P5_EVENT_TYPE').val(),
           place_of_event: $('#P5_PLACE_OF_EVENT').val(),
-          REQUEST_LETTER: requestLetter && requestLetter.fileBase64 ? requestLetter.fileBase64 : null,
-          ATTACH_MIMETYPE: requestLetter && requestLetter.mimetype ? requestLetter.mimetype : null,
-          ATTACH_FILENAME: requestLetter && requestLetter.filename ? requestLetter.filename : null,
-          ASSURANCE_BOND: assuranceBond && assuranceBond.fileBase64 ? assuranceBond.fileBase64 : null,
-          ASSURANCE_BOND_ATTACH_MIMETYPE: assuranceBond && assuranceBond.mimetype ? assuranceBond.mimetype : null,
-          ASSURANCE_BOND_ATTACH_FILENAME: assuranceBond && assuranceBond.filename ? assuranceBond.filename : null,
-          INSURANCE_COPY: insurance && insurance.fileBase64 ? insurance.fileBase64 : null,
-          INSURANCE_COPY_ATTACH_MIMETYPE: insurance && insurance.mimetype ? insurance.mimetype : null,
-          INSURANCE_COPY_ATTACH_FILENAME: insurance && insurance.filename ? insurance.filename : null,
-          LAYOUT_SKETCH: layoutSketch && layoutSketch.fileBase64 ? layoutSketch.fileBase64 : null,
-          LAYOUT_SKETCH_ATTACH_MIMETYPE: layoutSketch && layoutSketch.mimetype ? layoutSketch.mimetype : null,
-          LAYOUT_SKETCH_ATTACH_FILENAME: layoutSketch && layoutSketch.filename ? layoutSketch.filename : null,
-          OTHER_DOCS: otherDocs && otherDocs.fileBase64 ? otherDocs.fileBase64 : null,
-          OTHER_DOCS_ATTACH_MIMETYPE: otherDocs && otherDocs.mimetype ? otherDocs.mimetype : null,
-          OTHER_DOCS_ATTACH_FILENAME: otherDocs && otherDocs.filename ? otherDocs.filename : null,
-          PREVIOUS_EVENT: previousEvent && previousEvent.fileBase64 ? previousEvent.fileBase64 : null,
-          PREVIOUS_EVENT_ATTACH_MIMETYPE: previousEvent && previousEvent.mimetype ? previousEvent.mimetype : null,
-          PREVIOUS_EVENT_ATTACH_FILENAME: previousEvent && previousEvent.filename ? previousEvent.filename : null,
-          PANCHAYAT_UNION: panchayatUnion && panchayatUnion.fileBase64 ? panchayatUnion.fileBase64 : null,
-          PANCHAYAT_UNION_ATTACH_MIMETYPE: panchayatUnion && panchayatUnion.mimetype ? panchayatUnion.mimetype : null,
-          PANCHAYAT_UNION_ATTACH_FILENAME: panchayatUnion && panchayatUnion.filename ? panchayatUnion.filename : null,
-          FIR: fir && fir.fileBase64 ? fir.fileBase64 : null,
-          FIR_ATTACH_MIMETYPE: fir && fir.mimetype ? fir.mimetype : null,
-          FIR_ATTACH_FILENAME: fir && fir.filename ? fir.filename : null,
-          UPLOAD_PHOTO: uploadPhoto && uploadPhoto.fileBase64 ? uploadPhoto.fileBase64 : null,
-          UPLOAD_PHOTO_ATTACH_MIMETYPE: uploadPhoto && uploadPhoto.mimetype ? uploadPhoto.mimetype : null,
-          UPLOAD_PHOTO_ATTACH_FILENAME: uploadPhoto && uploadPhoto.filename ? uploadPhoto.filename : null,
+
+          // Attachments (new or existing)
+          REQUEST_LETTER: requestLetter.fileBase64,
+          ATTACH_MIMETYPE: requestLetter.mimetype,
+          ATTACH_FILENAME: requestLetter.filename,
+
+          ASSURANCE_BOND: assuranceBond.fileBase64,
+          ASSURANCE_BOND_ATTACH_MIMETYPE: assuranceBond.mimetype,
+          ASSURANCE_BOND_ATTACH_FILENAME: assuranceBond.filename,
+
+          INSURANCE_COPY: insurance.fileBase64,
+          INSURANCE_COPY_ATTACH_MIMETYPE: insurance.mimetype,
+          INSURANCE_COPY_ATTACH_FILENAME: insurance.filename,
+
+          LAYOUT_SKETCH: layoutSketch.fileBase64,
+          LAYOUT_SKETCH_ATTACH_MIMETYPE: layoutSketch.mimetype,
+          LAYOUT_SKETCH_ATTACH_FILENAME: layoutSketch.filename,
+
+          OTHER_DOCS: otherDocs.fileBase64,
+          OTHER_DOCS_ATTACH_MIMETYPE: otherDocs.mimetype,
+          OTHER_DOCS_ATTACH_FILENAME: otherDocs.filename,
+
+          PREVIOUS_EVENT: previousEvent.fileBase64,
+          PREVIOUS_EVENT_ATTACH_MIMETYPE: previousEvent.mimetype,
+          PREVIOUS_EVENT_ATTACH_FILENAME: previousEvent.filename,
+
+          PANCHAYAT_UNION: panchayatUnion.fileBase64,
+          PANCHAYAT_UNION_ATTACH_MIMETYPE: panchayatUnion.mimetype,
+          PANCHAYAT_UNION_ATTACH_FILENAME: panchayatUnion.filename,
+
+          FIR: fir.fileBase64,
+          FIR_ATTACH_MIMETYPE: fir.mimetype,
+          FIR_ATTACH_FILENAME: fir.filename,
+
+          UPLOAD_PHOTO: uploadPhoto.fileBase64,
+          UPLOAD_PHOTO_ATTACH_MIMETYPE: uploadPhoto.mimetype,
+          UPLOAD_PHOTO_ATTACH_FILENAME: uploadPhoto.filename,
+
           Mhs_comments: details.mhs_comments,
-          Request_Status: "RO", // RO - for rejected, SN - for need for information
+          Request_Status: "RO",
           Forward_to: "Magesterial huzur sharishthadhar MHS",
         };
+
+        console.log('payload:', payload);
+        // return;
+        // ✅ Submit the API
         $.ajax({
           url: `${BASE_API_URL}/registration/update_registration`,
           type: 'POST',
@@ -1557,7 +1605,6 @@
           data: JSON.stringify(payload),
           success: function (response) {
             console.log('Response:', response);
-            // Handle the success response here
             showSuccessToast("Updation Successful");
             setTimeout(function () {
               window.location.href = 'application-status.html';
@@ -1569,127 +1616,117 @@
           }
         });
       });
-      // Function to validate a field and display error message
+
+      // ✅ Helper functions
       function validateField(selector, errorMessage) {
         if ($(selector).val().trim() === '') {
           errors = true;
-          // Check if the error message already exists and update it, else append it
           $(selector + '_error_placeholder').text(errorMessage).css('color', 'red');
         } else {
-          // Clear the error message if the field is filled
           $(selector + '_error_placeholder').text('');
         }
       }
-      // Function to validate and update the payload for each file input
-      function validateFile(selector, errorMessage) {
-        var fileInput = $(selector).find('input[type="file"]');
-        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg'];
-        const maxSize = 2 * 1024 * 1024; // 2MB in bytes
-        var file = fileInput[0].files[0];
 
-        // Check if a file has been selected
-        if (!file) {
-          errors = true;
-          $('#' + selector.replace('#', '') + '_error_placeholder').text(errorMessage).css('color', 'red');
-        } else {
-          // Check file type
-          if (!validTypes.includes(file.type)) {
-            errors = true;
-            $('#' + selector.replace('#', '') + '_error_placeholder').text('Invalid file type. Supported types are .pdf, .jpg, .jpeg.').css('color', 'red');
-            return;
-          }
-
-          // Check file size
-          if (file.size > maxSize) {
-            errors = true;
-            $('#' + selector.replace('#', '') + '_error_placeholder').text("File size exceeds the 2MB limit.").css('color', 'red');
-            return;
-          }
-        }
-      }
-
-      // Function to validate and update the payload for each file input
       function checkFile(selector) {
         var fileInput = $(selector).find('input[type="file"]');
         const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg'];
-        const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+        const maxSize = 2 * 1024 * 1024;
         var file = fileInput[0].files[0];
 
-        // Check if a file has been selected
         if (file) {
-          // Check file type
           if (!validTypes.includes(file.type)) {
             errors = true;
-            $('#' + selector.replace('#', '') + '_error_placeholder').text('Invalid file type. Supported types are .pdf, .jpg, .jpeg.').css('color', 'red');
+            $('#' + selector.replace('#', '') + '_error_placeholder')
+              .text('Invalid file type. Supported types are .pdf, .jpg, .jpeg.').css('color', 'red');
             return;
           }
-
-          // Check file size
           if (file.size > maxSize) {
             errors = true;
-            $('#' + selector.replace('#', '') + '_error_placeholder').text("File size exceeds the 2MB limit.").css('color', 'red');
+            $('#' + selector.replace('#', '') + '_error_placeholder')
+              .text("File size exceeds the 2MB limit.").css('color', 'red');
             return;
           }
         }
       }
-      function processFile(selector) {
+
+      // function processFile(selector) {
+      //   debugger;
+      //   return new Promise((resolve, reject) => {
+      //     var fileInput = $(selector)[0];
+      //     var file = fileInput.files[0];
+      //     if (file) {
+      //       const reader = new FileReader();
+      //       const fileData = {};
+      //       reader.onload = function (event) {
+      //         fileData.fileBase64 = event.target.result.split(',')[1];
+      //         fileData.mimetype = file.type;
+      //         fileData.filename = file.name;
+      //         resolve(fileData);
+      //       };
+      //       reader.onerror = function (error) {
+      //         reject(error);
+      //       };
+      //       reader.readAsDataURL(file);
+      //     } else {
+      //       resolve(null);
+      //     }
+      //   });
+      // }
+
+      function processFile(selector, existingBase64, existingMime, existingName) {
         return new Promise((resolve, reject) => {
           var fileInput = $(selector)[0];
           var file = fileInput.files[0];
 
           if (file) {
             const reader = new FileReader();
-            const fileData = {};
-
             reader.onload = function (event) {
-              // File processed as Base64 string
-              fileData.fileBase64 = event.target.result.split(',')[1];
-              fileData.mimetype = file.type;
-              fileData.filename = file.name;
-
-              resolve(fileData); // Resolve the promise with fileData
+              resolve({
+                fileBase64: event.target.result.split(',')[1],
+                mimetype: file.type,
+                filename: file.name
+              });
             };
-
             reader.onerror = function (error) {
-              reject(error); // Reject the promise in case of error
+              reject(error);
             };
-
-            reader.readAsDataURL(file); // Read the file as a data URL (Base64)
+            reader.readAsDataURL(file);
+          } else {
+            // ✅ Return existing file data if no new file uploaded
+            resolve({
+              fileBase64: existingBase64 || null,
+              mimetype: existingMime || null,
+              filename: existingName || null
+            });
           }
         });
       }
-      // Function to format the date in MM/DD/YYYY to YYYY-MM-DD
-      function formatDate(dateString) {
-        // Create a new Date object from the provided MM/DD/YYYY date string
-        var dateObj = new Date(dateString);
 
-        // Check if the date is valid
+
+      function formatDate(dateString) {
+        var dateObj = new Date(dateString);
         if (isNaN(dateObj.getTime())) {
           showErrorToast("Event Date / நிகழ்வு தேதி must be a valid date, for example 01/01/2024.");
-          return null; // Return null if the date is invalid
+          return null;
         }
-
-        // Return the date in the YYYY-MM-DD format
-        return dateObj.toISOString().split('T')[0]; // Get only the date part (YYYY-MM-DD)
+        return dateObj.toISOString().split('T')[0];
       }
-      // Function to convert YYYY-MM-DD to MM/DD/YYYY
-      function convertToMMDDYYYY(dateString) {
-        var dateParts = dateString.split('-'); // Split the string by '-'
 
+      function convertToMMDDYYYY(dateString) {
+        var dateParts = dateString.split('-');
         if (dateParts.length !== 3) {
           showErrorToast("Invalid date format. Expected format is YYYY-MM-DD.");
           return null;
         }
-
-        // Extract year, month, and day from the split date
         var year = dateParts[0];
         var month = dateParts[1];
         var day = dateParts[2];
-
-        // Return the date in MM/DD/YYYY format
         return month + '/' + day + '/' + year;
       }
     });
+
+
+
   </script>
   <script src="../assets/js/changePassword.js"></script>
   <link rel="stylesheet" href="../assets/css/popUp.css" type="text/css" />

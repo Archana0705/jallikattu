@@ -653,18 +653,8 @@
                       <div class="t-Region-body">
                         <div class="t-Region-orderBy"></div>
                         <h3 class="text-middle">About the Department</h3>
-                        <p data-aos="fade-down" class="text-justify aboutus">
-                          <!-- Jallikkattu is a traditional and cultural festival and is significant to the people of Tamil Nadu. Conduct of
-    Jallikattu events usually begin during Pongal (Harvest festival) and are subsequently conducted during temple
-    festivals. People of Tamil Nadu without any discrimination to caste, creed celebrate Jallikattu as a traditional
-    festival. -->
-                          <!-- Jallikattu, a traditional event of rural people in Tamil Nadu, which is conducted during Pongal festival, has a
-    5,000-year-old tradition and a history associated with the socio-cultural ethos of Tamil Nadu. Jallikattu events are to
-    be conducted only in those places that are notified in the State Gazette. The conduct of each Jallikattu event is
-    subject to the Tamil Nadu Prevention of Cruelty to Animals (Conduct of Jallikattu) Rules, 2017.The Department ensures
-    compliance to the Prevention of Cruelty to Animals (Tamil Nadu amendment) Act, 2017 through adequate precautionary
-    measures. While preserving the cultural sentiments of Tamil Nadu, it is ensured that the bulls are not subjected to
-    unnecessary pain and suffering during the events. -->
+                        <p class="text-justify aboutus">
+
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Animal Husbandry
                           Department in Tamil Nadu, is responsible for the implementation of various programs and
                           schemes related to animal husbandry, veterinary services, and dairy development in the
@@ -692,24 +682,19 @@
 
                         <h3 class="text-middle">Acts and Rules</h3>
                         <div class="card-cont">
-                          <a class="pdf-btn" target="blank"
-                            href="https://www.jallikattu.tn.gov.in/ords/r/wsjallikattu/110/files/static/v1667/2009TN27.pdf"><i
+                          <a class="pdf-btn" target="blank" href="assets/pdfs/2009TN27.pdf"><i
                               class="fa fa-file-pdf-o"></i>
                             Tamil Nadu Regulation of Jallikattu Act, 2009</a>
-                          <a class="pdf-btn" target="blank"
-                            href="https://www.jallikattu.tn.gov.in/ords/r/wsjallikattu/110/files/static/v1667/ACT_1_of_2017_TN.pdf"><i
+                          <a class="pdf-btn" target="blank" href="assets/pdfs/ACT_1_of_2017_TN.pdf"><i
                               class="fa fa-file-pdf-o"></i> The Prevention of Cruelty to Animals (Tamil Nadu
                             Amendment) Act, 2017</a>
                           <!-- <a class="pdf-btn" target="blank" href="r/wsjallikattu/110/files/static/v1667/GO_27.pdf">G.O1</a> -->
-                          <a class="pdf-btn" target="blank"
-                            href="https://www.jallikattu.tn.gov.in/ords/r/wsjallikattu/110/files/static/v1667/Jallikattu_G.O.7.pdf"><i
+                          <a class="pdf-btn" target="blank" href="assets/pdfs/Jallikattu_G.O.7.pdf"><i
                               class="fa fa-file-pdf-o"></i> Tamil Nadu Prevention of Cruelty to Animals (Conduct of
                             Jallikattu) Rules, 2017</a>
-                          <a class="pdf-btn" target="blank"
-                            href="https://www.jallikattu.tn.gov.in/ords/r/wsjallikattu/110/files/static/v1667/SOP24.pdf"><i
+                          <a class="pdf-btn" target="blank" href="assets/pdfs/SOP_Jallikattu - 2025.pdf"><i
                               class="fa fa-file-pdf-o"></i> Standard Operating Procedures for Jallikattu, 2024</a>
-                          <a class="pdf-btn" target="blank"
-                            href="https://www.jallikattu.tn.gov.in/ords/r/wsjallikattu/110/files/static/v1667/insurance.pdf"><i
+                          <a class="pdf-btn" target="blank" href="assets/pdfs/insurance.pdf"><i
                               class="fa fa-file-pdf-o"></i> Government letter on Insurance coverage, 2023</a>
                         </div>
 
@@ -1153,12 +1138,10 @@
       history.replaceState(null, null, location.href);
       history.pushState(null, null, location.href);
       window.onpopstate = function () {
-        alert('onpopstate');
         window.location.href = "index.html";
       };
       $(window).on("beforeunload", () => history.pushState(null, null, location.href));
 
-      // 🔽 Modal Dialog Setup
       $("#modal").dialog({
         autoOpen: false,
         modal: true,
@@ -1173,7 +1156,6 @@
         $("#modal").dialog("close");
       });
 
-      // 🔽 Forgot Password Overlay
       $('#forgetPassword').on('click', function () {
         $('#popup-overlay').fadeIn().css('z-index', '999');
 
@@ -1189,7 +1171,7 @@
           const pasted = (e.originalEvent || e).clipboardData.getData('text/plain');
           if (/<[^>]*>|[<>\/{}$%^&*=`"'|\\]/g.test(pasted)) {
             e.preventDefault();
-            alert("Special characters or HTML tags are not allowed.");
+            showErrorToast("Special characters or HTML tags are not allowed.");
           }
         });
       });
